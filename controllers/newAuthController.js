@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const catchAsync = require("../utils/catchAsync");
 const appError = require("../utils/appError");
 const signToken = (id) => {
-  return jwt.sign({ id }, "secfklsaieioja423=-dd", {
+  return jwt.sign({ id }, process.env.TOKEN_SECRET, {
     expiresIn: "90d",
   });
 };
@@ -54,7 +54,22 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new appError("yor are not login please login to access", 401));
   }
   //verify the token
-  const decoded = await promisify(jwt.verify)(token, "secfklsaieioja423=-dd");
-  console.log("decoded value of the token is ", decoded);
+  const decoded = await promisify(jwt.verify)(token, process.env.TOKEN_SECRET);
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(
+      new appError("the use belong to this token doesn't exist", 401)
+    );
+  }
+  if (currentUser.changedAfterPassword(decoded.iat)) {
+    return next(
+      new appError(
+        "user recently changed his password, please login again!",
+        401
+      )
+    );
+  }
+  req.user = currentUser;
+  //now here user can access the routes
   next();
 });
