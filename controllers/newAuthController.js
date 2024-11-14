@@ -58,7 +58,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return next(
-      new appError("the use belong to this token doesn't exist", 401)
+      new appError("the user belong to this token doesn't exist", 401)
     );
   }
   if (currentUser.changedAfterPassword(decoded.iat)) {
@@ -73,3 +73,25 @@ exports.protect = catchAsync(async (req, res, next) => {
   //now here user can access the routes
   next();
 });
+
+//this controller protect the routes and give the authorization
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new appError("you doesn't have permission to do this action", 403)
+      );
+    }
+    next();
+  };
+};
+// exports.restrictTo = catchAsync(async (...roles) => {
+//   return (req, res, next) => {
+//     if (!roles.includes(req.user.role)) {
+//       return next(
+//         new appError("you doesn't have permission to do this action", 403)
+//       );
+//     }
+//     next();
+//   };
+// });

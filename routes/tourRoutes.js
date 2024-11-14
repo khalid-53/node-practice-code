@@ -13,7 +13,15 @@ router.get(
   authController.protect,
   tourController.getAllTours
 );
-router.get("/get-tour/:id", tourController.getTour);
+// router.get("/get-tour/:id", tourController.getTour).delete();
+router
+  .route("/:id")
+  .get(tourController.getTour)
+  .delete(
+    authController.protect,
+    authController.restrictTo("admin", "lead-guide"),
+    tourController.deleteTour
+  );
 
 // router
 //   .route('/top-5-cheap')
