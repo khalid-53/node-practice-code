@@ -85,6 +85,21 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+//controller is used for forgot password
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new appError(
+        `There is no user exit with that email ${req.body.email} address`,
+        404
+      )
+    );
+  }
+  const resetToken = user.createPasswordRestToken();
+  await user.save({ validateBeforeSave: false });
+});
 // exports.restrictTo = catchAsync(async (...roles) => {
 //   return (req, res, next) => {
 //     if (!roles.includes(req.user.role)) {
