@@ -38,9 +38,15 @@ const userSchema = new mongoose.Schema({
       message: "passwords are not the same!",
     },
   },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+
   //     validate: {
 
   //       validator: function(el) {
@@ -127,6 +133,11 @@ userSchema.pre("save", async function (next) {
 userSchema.pre("save", function (next) {
   if (!this.isModified("password") || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+//this query middleware is used to show the only users that are active
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 

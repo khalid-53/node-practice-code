@@ -9,11 +9,31 @@ const express = require("express");
 const userRouter = require("./routes/userRoutes");
 const tourRouter = require("./routes/tourRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 const app = express();
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const hpp = require("hpp");
+//helmet security
+app.use(helmet());
 
-// Middleware to parse JSON
-app.use(express.json());
+// Middleware to parse JSON  body parser to read data from body in req.body
+app.use(express.json({ limit: "10kb" }));
+//data sanitization against noSQL query injection
+app.use(mongoSanitize());
+//data sanitization against XSS attacks
+app.use(xss());
 
+//prevent parameter pollution
+app.use(hpp({ whitelist: ["duration"] }));
+//security for limit requests
+const limiter = rateLimit({
+  max: 100,
+  windowsMs: 60 * 60 * 1000,
+  message: "to many request from this IP please try again in an hour",
+});
+app.use(limiter);
 // Use the user router for routes starting with /user
 app.use("/user", userRouter);
 app.use("/tour", tourRouter);
