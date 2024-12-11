@@ -1,6 +1,40 @@
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const appError = require("../utils/appError");
+const uploadDir = path.resolve("public/images/user");
+
+// Ensure the directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const extension = file.mimetype.split("/")[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${extension}`);
+  },
+});
+
+//function to filter the files allow only images to enter
+
+const filterImages = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new appError("file is not image", 400));
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: filterImages,
+});
 const filterObj = (obj, ...allowFields) => {
   const newObj = {};
   Object.keys(obj).forEach((el) => {
@@ -8,6 +42,9 @@ const filterObj = (obj, ...allowFields) => {
   });
   return newObj;
 };
+
+exports.uploadUserPhoto = upload.single("photo");
+
 exports.addNewUser = async (req, res) => {
   try {
     const user = await User.create(req.body);

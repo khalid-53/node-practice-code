@@ -24,7 +24,6 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({
     message: "success",
     token,
-    user,
   });
 };
 exports.signUp = catchAsync(async (req, res, next) => {

@@ -46,16 +46,16 @@ const catchAsync = require("../utils/catchAsync");
 //   });
 // });
 
-// exports.createTour = catchAsync(async (req, res, next) => {
-//   const newTour = await Tour.create(req.body);
+exports.createTour = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
 
-//   res.status(201).json({
-//     status: 'success',
-//     data: {
-//       tour: newTour
-//     }
-//   });
-// });
+  res.status(201).json({
+    status: "success",
+    data: {
+      tour: newTour,
+    },
+  });
+});
 exports.getTour = async (req, res, next) => {
   // const tour = await Tour.findById(req.params.id).populate("tourGuides");
   // const tour = await Tour.findById(req.params.id).populate({
@@ -77,9 +77,11 @@ exports.getTour = async (req, res, next) => {
   });
 };
 
-exports.getAllTours = async (req, res, next) => {
-  const tours = await Tour.find().populate("tourGuides");
-
+exports.getAllTours = catchAsync(async (req, res, next) => {
+  const tours = await Tour.find();
+  if (!tours) {
+    return next(new appError("No tour found", 404));
+  }
   // SEND RESPONSE
   res.status(200).json({
     status: "success",
@@ -88,7 +90,7 @@ exports.getAllTours = async (req, res, next) => {
       tours,
     },
   });
-};
+});
 exports.createTour = async (req, res, next) => {
   const newTour = await Tour.create(req.body);
 
