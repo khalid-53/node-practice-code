@@ -5,7 +5,7 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const appError = require("../utils/appError");
 const uploadDir = path.resolve("public/images/user");
-
+const factory = require("../controllers/handlerFactory");
 // Ensure the directory exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -85,7 +85,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
 //this controller is used to inactive the user account when he wants to delete
 
-exports.deleteMe = catchAsync(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user.id, { active: false });
-  res.status(204).json({ status: "success" });
-});
+// exports.deleteMe = catchAsync(async (req, res, next) => {
+//   await User.findByIdAndUpdate(req.user.id, { active: false });
+//   res.status(204).json({ status: "success" });
+// });
+
+exports.deleteMe = factory.deleteOne(User);

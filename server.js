@@ -1,6 +1,5 @@
 const dotenv = require("dotenv");
 const path = require("path");
-
 const envPath = path.resolve(__dirname, ".env");
 dotenv.config({ path: envPath });
 const mongoose = require("mongoose");
@@ -38,16 +37,9 @@ app.use(limiter);
 app.use("/user", userRouter);
 app.use("/tour", tourRouter);
 app.use("/review", reviewRouter);
-const DB =
-  "mongodb+srv://khalidmetavizoffice:YpVa7mT1kB8RSN0d@cluster0.dxrtw.mongodb.net/practice?retryWrites=true&w=majority&appName=Cluster0";
+const DB = process.env.DB_URL;
 
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    // useCreateIndex: true,
-    // useFindAndModify: false
-  })
-  .then(() => console.log("DB connection successful!"));
+mongoose.connect(DB).then(() => console.log("DB connection successful!"));
 
 // const port = process.env.PORT || 3000;
 const port = 3000;

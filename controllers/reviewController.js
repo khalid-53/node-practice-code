@@ -1,6 +1,7 @@
 const reviewModel = require("../models/reviewsModel");
 const catchAsync = require("../utils/catchAsync");
 const appError = require("../utils/appError");
+const factory = require("../controllers/handlerFactory");
 //creating the new tour
 
 exports.addReview = catchAsync(async (req, res, next) => {
@@ -40,3 +41,5 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.deleteReview = factory.deleteOne(reviewModel);

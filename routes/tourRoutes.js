@@ -16,7 +16,7 @@ router.get(
 // router.get("/get-tour/:id", tourController.getTour).delete();
 router
   .route("/:id")
-  .get(tourController.getTour)
+  .get(tourController.getSingleTour)
   .delete(
     authController.protect,
     authController.restrictTo("admin", "lead-guide"),

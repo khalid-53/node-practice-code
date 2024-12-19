@@ -1,6 +1,8 @@
 const Tour = require("../models/tourModel");
 const appError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const mongoose = require("mongoose");
+const factory = require("../controllers/handlerFactory");
 // const APIFeatures = require('./../utils/apiFeatures');
 // const catchAsync = require('./../utils/catchAsync');
 // const AppError = require('./../utils/appError');
@@ -56,29 +58,71 @@ exports.createTour = catchAsync(async (req, res, next) => {
     },
   });
 });
-exports.getTour = async (req, res, next) => {
-  // const tour = await Tour.findById(req.params.id).populate("tourGuides");
-  // const tour = await Tour.findById(req.params.id).populate({
-  //   path: "tourGuides",
-  //   select: "-__v -email",
-  // });
-  const tour = await Tour.findById(req.params.id).populate("reviews");
-  // Tour.findOne({ _id: req.params.id })
+// exports.getSingleTour = async (req, res, next) => {
+//   // const tour = await Tour.findById(req.params.id).populate("tourGuides");
+//   // const tour = await Tour.findById(req.params.id).populate({
+//   //   path: "tourGuides",
+//   //   select: "-__v -email",
+//   // });
+//   console.log("id value is ", req.params.id);
+//   const tour = await Tour.findById(req.params.id).populate("reviews");
+//   // Tour.findOne({ _id: req.params.id })
 
-  if (!tour) {
-    return next(new AppError("No tour found with that ID", 404));
+//   if (!tour) {
+//     return next(new appError("No tour found with that ID", 404));
+//   }
+
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       tour,
+//     },
+//   });
+// };
+// exports.getSingleTour = async (req, res, next) => {
+//   const id = mongoose.Types.ObjectId(req.params.id);
+//   const tour = await Tour.findById(id).populate("reviews");
+//   if (!tour) {
+//     return next(new appError("No tour found with that ID", 404));
+//   }
+
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       tour,
+//     },
+//   });
+// };
+
+exports.getSingleTour = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+
+    // Check if the ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new appError("Invalid ID format", 400));
+    }
+
+    // Query the database
+    // const tour = await Tour.findById(id).populate("reviews");
+    const tour = await Tour.findById(id);
+
+    if (!tour) {
+      return next(new appError("No tour found with that ID", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: { tour },
+    });
+  } catch (err) {
+    console.error("Error fetching tour:", err);
+    return next(new appError("Server error", 500));
   }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour,
-    },
-  });
 };
 
 exports.getAllTours = catchAsync(async (req, res, next) => {
-  const tours = await Tour.find();
+  const tours = await Tour.find().populate("reviews");
   if (!tours) {
     return next(new appError("No tour found", 404));
   }
@@ -120,18 +164,20 @@ exports.createTour = async (req, res, next) => {
 //   });
 // });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndDelete(req.params.id);
 
-  if (!tour) {
-    return next(new appError("No tour found with that ID", 404));
-  }
+//   if (!tour) {
+//     return next(new appError("No tour found with that ID", 404));
+//   }
 
-  res.status(204).json({
-    status: "success",
-    data: null,
-  });
-});
+//   res.status(204).json({
+//     status: "success",
+//     data: null,
+//   });
+// });
+
+exports.deleteTour = factory.deleteOne(Tour);
 
 // exports.getTourStats = catchAsync(async (req, res, next) => {
 //   const stats = await Tour.aggregate([
